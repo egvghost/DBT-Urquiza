@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBT Urquiza | FreeStyle Libre 2 - Monitoreo Continuo de Glucosa</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        abbott: {
+                            blue: '#002A54',
+                            cyan: '#00A3E0',
+                            yellow: '#FFC72C',
+                            light: '#F4F8FA',
+                            dark: '#0A192F'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #00A3E0;
+            border-radius: 4px;
+        }
+        /* Continuous spin animation for sensor graphic ring */
+        @keyframes slowSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-slow-spin {
+            animation: slowSpin 20s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- NAVIGATION HEADER -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('hero')">
+                    <div class="w-12 h-12 bg-gradient-to-tr from-abbott-blue to-abbott-cyan rounded-xl flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+                        <i class="fa-solid font-bold text-2xl fa-wave-square"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-abbott-blue to-abbott-cyan bg-clip-text text-transparent">DBT URQUIZA</span>
+                        <p class="text-xs font-semibold text-cyan-600 tracking-wider uppercase">Distribución Especializada</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">
+                    <button onclick="navigateTo('hero')" class="hover:text-abbott-cyan transition-colors">Inicio</button>
+                    <button onclick="navigateTo('producto')" class="hover:text-abbott-cyan transition-colors">Producto</button>
+                    <button onclick="navigateTo('especificaciones')" class="hover:text-abbott-cyan transition-colors">Especificaciones</button>
+                    <button onclick="navigateTo('tips')" class="hover:text-abbott-cyan transition-colors">Tips de Uso</button>
+                    <button onclick="navigateTo('banner-deportes')" class="hover:text-abbott-cyan transition-colors">Agua y Deportes</button>
+                    <button onclick="navigateTo('ecosistema')" class="hover:text-abbott-cyan transition-colors">Ecosistema</button>
+                    <button onclick="navigateTo('contacto')" class="hover:text-abbott-cyan transition-colors">Contacto</button>
+                </nav>
+
+                <!-- Header Actions & Discrete WhatsApp Button -->
+                <div class="hidden lg:flex items-center space-x-4">
+                    <a href="https://wa.me/541151796752?text=Hola%20DBT%20Urquiza,%20quisiera%20consultar%20por%20el%20sensor%20FreeStyle%20Libre%202" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all duration-200 space-x-2 shadow-sm">
+                        <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+                        <span>+54 11 51796752</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Hamburger Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="p-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none" aria-label="Abrir Menú">
+                        <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-xl">
+            <button onclick="navigateTo('hero')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Inicio</button>
+            <button onclick="navigateTo('producto')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Producto</button>
+            <button onclick="navigateTo('especificaciones')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Especificaciones</button>
+            <button onclick="navigateTo('tips')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Tips de Uso</button>
+            <button onclick="navigateTo('banner-deportes')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Agua y Deportes</button>
+            <button onclick="navigateTo('ecosistema')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Ecosistema Digital</button>
+            <button onclick="navigateTo('contacto')" class="block w-full text-left py-2 px-3 rounded-md text-slate-700 hover:bg-slate-50 font-medium">Contacto</button>
+            
+            <div class="pt-2 border-t border-slate-100">
+                <a href="https://wa.me/541151796752?text=Hola%20DBT%20Urquiza,%20quisiera%20consultar%20por%20el%20sensor%20FreeStyle%20Libre%202" target="_blank" class="flex items-center justify-center w-full py-2.5 rounded-xl bg-emerald-500 text-white font-bold text-sm space-x-2 shadow">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Consultar por WhatsApp</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO SECTION (No Background Images, Gradient Slide Cards Only) -->
+        <section id="hero" class="relative bg-slate-900 py-16 lg:py-24 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                
+                <!-- Hero Slider Outer Wrapper -->
+                <div class="max-w-4xl mx-auto">
+                    
+                    <!-- Slide Container -->
+                    <div id="hero-slider-container" class="relative min-h-[380px] md:min-h-[320px] rounded-3xl p-8 md:p-12 shadow-2xl transition-all duration-500 bg-gradient-to-br from-abbott-blue via-slate-900 to-cyan-900 border border-slate-700/50 flex flex-col justify-center text-center items-center">
+                        
+                        <!-- SLIDE 1 -->
+                        <div class="hero-slide active-slide transition-opacity duration-500 flex flex-col items-center">
+                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 mb-6">
+                                <i class="fa-solid fa-heart-pulse mr-2"></i> Tecología Abbott
+                            </span>
+                            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+                                Monitoreo Continuo de Glucosa
+                            </h1>
+                            <p class="text-lg md:text-xl text-slate-300 max-w-2xl font-light mb-8">
+                                Control en tiempo real con exactitud comprobada. Descubrí la libertad de conocer tus niveles sin pinchazos constantes de rutina.
+                            </p>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button onclick="navigateTo('producto')" class="px-7 py-3.5 rounded-full bg-abbott-cyan text-slate-900 font-bold hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/25">
+                                    Ver Producto
+                                </button>
+                                <button onclick="navigateTo('contacto')" class="px-7 py-3.5 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 border border-white/20 transition-all">
+                                    Contactar DBT Urquiza
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 2 -->
+                        <div class="hero-slide hidden transition-opacity duration-500 flex flex-col items-center">
+                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-6">
+                                <i class="fa-solid fa-shield-halved mr-2"></i> Seguridad Familiar
+                            </span>
+                            <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+                                Tranquilidad para toda la familia
+                            </h2>
+                            <p class="text-lg md:text-xl text-slate-300 max-w-2xl font-light mb-8">
+                                Alertas opcionales programables en tiempo real vía Bluetooth que te avisan ante valores de glucosa alta o baja.
+                            </p>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button onclick="navigateTo('especificaciones')" class="px-7 py-3.5 rounded-full bg-amber-400 text-slate-950 font-bold hover:bg-amber-300 transition-all shadow-lg shadow-amber-500/25">
+                                    Conocer Alertas
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 3 -->
+                        <div class="hero-slide hidden transition-opacity duration-500 flex flex-col items-center">
+                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-6">
+                                <i class="fa-solid fa-bolt mr-2"></i> Rapidez & Comodidad
+                            </span>
+                            <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+                                Control sin pinchazos
+                            </h2>
+                            <p class="text-lg md:text-xl text-slate-300 max-w-2xl font-light mb-8">
+                                Lecturas instantáneas en 1 segundo escaneando el sensor con tu teléfono inteligente o lector dedicado.
+                            </p>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button onclick="navigateTo('tips')" class="px-7 py-3.5 rounded-full bg-emerald-400 text-slate-950 font-bold hover:bg-emerald-300 transition-all shadow-lg shadow-emerald-500/25">
+                                    Guía de Uso
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- SLIDER NAVIGATION CONTROLS & INDICATORS (SAFELY PLACED BELOW THE HERO TEXT) -->
+                    <div class="mt-8 flex items-center justify-between px-4 max-w-md mx-auto">
+                        <button id="hero-prev" class="w-11 h-11 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition-all shadow-md active:scale-95" aria-label="Anterior Slide">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <!-- Dots Indicators -->
+                        <div class="flex items-center space-x-3" id="hero-dots">
+                            <button class="dot-btn w-3.5 h-3.5 rounded-full bg-abbott-cyan transition-all" onclick="goToSlide(0)" aria-label="Slide 1"></button>
+                            <button class="dot-btn w-3 h-3 rounded-full bg-slate-700 transition-all" onclick="goToSlide(1)" aria-label="Slide 2"></button>
+                            <button class="dot-btn w-3 h-3 rounded-full bg-slate-700 transition-all" onclick="goToSlide(2)" aria-label="Slide 3"></button>
+                        </div>
+
+                        <button id="hero-next" class="w-11 h-11 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition-all shadow-md active:scale-95" aria-label="Siguiente Slide">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "FreeStyle Libre 2" PRODUCT PRESENTATION SECTION -->
+        <section id="producto" class="py-20 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-abbott-cyan font-bold uppercase tracking-wider text-sm">Presentación de Producto</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-4">
+                        FreeStyle Libre 2
+                    </h2>
+                    <p class="text-slate-600 text-lg">
+                        Comercializado y distribuido por <strong class="text-abbott-blue">DBT Urquiza</strong>. Garantía de producto original de Abbott con soporte especializado.
+                    </p>
+                </div>
+
+                <!-- 2 Static Images Side by Side in Equal Sizes with Clean Transparent Background Containers -->
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-stretch max-w-5xl mx-auto">
+                    
+                    <!-- BOX PHOTO CARD -->
+                    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-between text-center group">
+                        <div class="w-full flex-1 flex items-center justify-center p-6 bg-transparent rounded-2xl mb-6 min-h-[280px]">
+                            <img src="https://dqm4sv5xk0oaj.cloudfront.net/products/56469/large/open-uri20240909-6-lqltvg.?1725890105" 
+                                 alt="Caja Kit Sensor FreeStyle Libre 2" 
+                                 class="max-h-64 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                                 onerror="this.src='https://placehold.co/400x400/ffffff/00A3E0?text=Sensor+FreeStyle+Libre+2'">
+                        </div>
+                        <div>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 mb-2">Kit de Sensor</span>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-2">Sensor FreeStyle Libre 2</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Incluye aplicador estéril y paquete de sensor individual para 14 días completos de monitoreo sin pinchazos cotidianos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- READER PHOTO CARD -->
+                    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-between text-center group">
+                        <div class="w-full flex-1 flex items-center justify-center p-6 bg-transparent rounded-2xl mb-6 min-h-[280px]">
+                            <img src="https://media03.farmaciaslider.com.ar/36400-thickbox_default/lector-freestyle-libre-2-.jpg" 
+                                 alt="Lector FreeStyle Libre 2" 
+                                 class="max-h-64 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                                 onerror="this.src='https://placehold.co/400x400/ffffff/002A54?text=Lector+FreeStyle+Libre+2'">
+                        </div>
+                        <div>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 mb-2">Lector Digital</span>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-2">Lector Oficial FreeStyle Libre 2</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                Dispositivo compacto de lectura pantalla color touch para escanear en 1 segundo y recibir alarmas acústicas o por vibración.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "ESPECIFICACIONES CLAVE DEL SENSOR" SUB-SECTION -->
+        <section id="especificaciones" class="py-20 bg-white border-y border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Title and Subtitle -->
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="text-abbott-cyan font-bold uppercase tracking-wider text-sm">Tecnología de Medición</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-4">
+                        Especificaciones Clave del Sensor
+                    </h2>
+                    <p class="text-slate-600 text-lg">
+                        Diseño compacto, inteligente y resistente pensado para acompañar tu vida cotidiana sin interrupciones.
+                    </p>
+                </div>
+
+                <!-- RESTORED STYLIZED SENSOR GRAPHIC INSIDE SPINNING DASHED CIRCLE RING (PLACED DIRECTLY ABOVE THE 4 SPECS CARDS) -->
+                <div class="mb-16 py-8 text-center flex flex-col items-center justify-center">
+                    <div class="relative w-72 h-72 flex items-center justify-center my-4">
+                        
+                        <!-- Rotating Cyan Dashed Ring -->
+                        <div class="absolute inset-0 border-4 border-dashed border-cyan-400 rounded-full animate-slow-spin"></div>
+                        
+                        <!-- Outer Glow Ring -->
+                        <div class="absolute inset-3 border border-cyan-200 rounded-full bg-cyan-50/30"></div>
+                        
+                        <!-- Stylized White Sensor Disc Graphic -->
+                        <div class="relative z-10 w-52 h-52 bg-white rounded-full shadow-2xl border border-slate-200 flex flex-col items-center justify-center p-4 text-center transform hover:scale-105 transition-transform duration-300">
+                            <!-- Sensor Filament Hole Dot -->
+                            <div class="w-3 h-3 bg-slate-800 rounded-full mb-2 shadow-inner border border-slate-400"></div>
+                            
+                            <span class="text-[10px] font-black tracking-widest text-slate-400 uppercase">Abbott</span>
+                            <span class="text-lg font-black tracking-tight text-abbott-blue leading-none my-1">FreeStyle</span>
+                            <span class="text-xs font-bold text-abbott-cyan tracking-wider uppercase mb-2">Libre 2</span>
+                            
+                            <!-- NFC Signal Wave Icon -->
+                            <div class="flex items-center space-x-1 text-cyan-500 mt-1">
+                                <i class="fa-solid fa-wifi text-base rotate-90"></i>
+                            </div>
+                            <span class="text-[9px] font-semibold text-slate-400 mt-1">NFC / Bluetooth</span>
+                        </div>
+
+                    </div>
+                    <p class="text-xs font-semibold text-slate-400 mt-2">Diagrama Ilustrativo del Sensor de Glucosa</p>
+                </div>
+
+                <!-- 4 KEY SPECIFICATIONS GRID (BELOW THE GRAPHIC) -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+                    
+                    <!-- Spec 1 -->
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md flex flex-col items-start">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500 text-white flex items-center justify-center mb-5 text-xl font-bold shadow-md shadow-cyan-500/20">
+                            <i class="fa-regular fa-calendar-check"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">14 Días de Duración</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Hasta 14 días consecutivos de monitoreo continuo ininterrumpido sin necesidad de calibración con pinchazos capilares.
+                        </p>
+                    </div>
+
+                    <!-- Spec 2 -->
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md flex flex-col items-start">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center mb-5 text-xl font-bold shadow-md shadow-amber-500/20">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Alertas Opcionales</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Notificaciones en tiempo real vía Bluetooth enviadas a tu smartphone o lector cuando la glucosa esté muy alta o muy baja.
+                        </p>
+                    </div>
+
+                    <!-- Spec 3 -->
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md flex flex-col items-start">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center mb-5 text-xl font-bold shadow-md shadow-blue-500/20">
+                            <i class="fa-solid fa-droplet"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Resistencia al Agua</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Resistente al agua en inmersiones de hasta 1 metro de profundidad por un tiempo máximo de 30 minutos (ducha, baño y natación).
+                        </p>
+                    </div>
+
+                    <!-- Spec 4 -->
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md flex flex-col items-start">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center mb-5 text-xl font-bold shadow-md shadow-emerald-500/20">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Lectura en 1 Segundo</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Obtención inmediata del valor glucémico actual, la flecha de tendencia histórica y el historial de las últimas 8 horas.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "TIPS DE USO Y COLOCACIÓN" SECTION -->
+        <section id="tips" class="py-20 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-abbott-cyan font-bold uppercase tracking-wider text-sm">Guía Práctica</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-4">
+                        Tips de Uso y Colocación
+                    </h2>
+                    <p class="text-slate-600 text-lg">
+                        Instrucciones esenciales para asegurar una correcta aplicación y una lectura precisa desde el primer día.
+                    </p>
+                </div>
+
+                <!-- 2 FICHAS / CARDS -->
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+                    
+                    <!-- CARD 1: COLOCACIÓN -->
+                    <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xl flex flex-col">
+                        <!-- Card Header Image -->
+                        <div class="h-64 bg-slate-100 relative overflow-hidden flex items-center justify-center border-b border-slate-200">
+                            <img src="https://http2.mlstatic.com/D_NQ_NP_2X_762102-MLM75539081750_042024-F.webp" 
+                                 alt="Proceso de Colocación del Sensor" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.src='https://placehold.co/600x400/002A54/ffffff?text=Colocacion+del+Sensor'">
+                        </div>
+                        
+                        <div class="p-8 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-900 mb-6 flex items-center space-x-2">
+                                    <span class="w-8 h-8 bg-cyan-100 text-cyan-700 rounded-lg flex items-center justify-center text-base font-bold">1</span>
+                                    <span>COLOCACIÓN</span>
+                                </h3>
+
+                                <div class="space-y-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold flex items-center justify-center shrink-0 border border-slate-300">
+                                            1
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 mb-1">Paso 1: Limpieza y Preparación</h4>
+                                            <p class="text-slate-600 text-sm leading-relaxed">
+                                                Seleccioná una zona plana en la parte posterior del brazo. Limpiá el área con una toallita con alcohol y dejá secar completamente la piel antes de aplicar.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold flex items-center justify-center shrink-0 border border-slate-300">
+                                            2
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 mb-1">Paso 2: Aplicación del Sensor</h4>
+                                            <p class="text-slate-600 text-sm leading-relaxed">
+                                                Alineá las marcas del aplicador con el paquete del sensor, presioná firmemente sobre la piel limpia e introducí el sensor con un movimiento suave y firme.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: MONITOREO -->
+                    <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xl flex flex-col">
+                        <!-- Card Header Image -->
+                        <div class="h-64 bg-slate-100 relative overflow-hidden flex items-center justify-center border-b border-slate-200">
+                            <img src="https://www.freestyle.abbott/adobe/dynamicmedia/deliver/dm-aid--99b6abba-422e-4f67-9152-70c062edc0e3/freestyle-hero.png?preferwebp=true&quality=85&width=1600" 
+                                 alt="Escaneo y Monitoreo con Smartphone" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.src='https://placehold.co/600x400/00A3E0/ffffff?text=Monitoreo+con+Smartphone'">
+                        </div>
+                        
+                        <div class="p-8 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-900 mb-6 flex items-center space-x-2">
+                                    <span class="w-8 h-8 bg-cyan-100 text-cyan-700 rounded-lg flex items-center justify-center text-base font-bold">2</span>
+                                    <span>MONITOREO</span>
+                                </h3>
+
+                                <div class="space-y-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold flex items-center justify-center shrink-0 border border-slate-300">
+                                            3
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 mb-1">Paso 3: Vinculación con App o Lector</h4>
+                                            <p class="text-slate-600 text-sm leading-relaxed">
+                                                Abrí la app FreeStyle LibreLink en tu smartphone o encendé tu lector oficial y escaneá el nuevo sensor para iniciar la cuenta regresiva de 1 hora.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold flex items-center justify-center shrink-0 border border-slate-300">
+                                            4
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 mb-1">Paso 4: Escaneo y Seguimiento de Tendencias</h4>
+                                            <p class="text-slate-600 text-sm leading-relaxed">
+                                                Escaneá tantas veces como quieras al día. Observá el valor actual, la flecha de tendencia y configura alarmas Bluetooth opcionales.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "TIP DBT URQUIZA PARA AGUA Y DEPORTES" BANNER -->
+        <section id="banner-deportes" class="py-16 bg-gradient-to-r from-slate-900 via-abbott-blue to-cyan-950 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl text-center max-w-5xl mx-auto">
+                    
+                    <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-cyan-400 text-slate-950 mb-4">
+                        <i class="fa-solid fa-water mr-1"></i> Recomendación Exclusiva
+                    </span>
+                    
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-8 tracking-tight">
+                        TIP DBT URQUIZA PARA AGUA Y DEPORTES
+                    </h2>
+
+                    <!-- 4 CIRCULAR IMAGES PLACED SIDE-BY-SIDE ON TOP (ENLARGED w-36 h-36 md:w-44 md:h-44 rounded-full object-cover) -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center mb-8">
+                        
+                        <!-- Image 1 -->
+                        <div class="flex flex-col items-center">
+                            <img src="https://www.freestyle.abbott/adobe/dynamicmedia/deliver/dm-aid--264a2b21-8ab8-455f-afee-b639f18c1aaf/gl-woman-on-yoga-ball-112-banner-d.png.webp" 
+                                 alt="Deporte y Bienestar" 
+                                 class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-cyan-400 shadow-xl transform hover:scale-105 transition-all duration-300"
+                                 onerror="this.src='https://placehold.co/300x300/00A3E0/ffffff?text=Deporte'">
+                        </div>
+
+                        <!-- Image 2 -->
+                        <div class="flex flex-col items-center">
+                            <img src="https://www.freestyle.abbott/adobe/dynamicmedia/deliver/dm-aid--4c172325-b547-41e3-a18a-f9b4361b42c7/librelinkup-box-540x532px.png.webp" 
+                                 alt="Monitoreo Activo" 
+                                 class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-cyan-400 shadow-xl transform hover:scale-105 transition-all duration-300"
+                                 onerror="this.src='https://placehold.co/300x300/002A54/ffffff?text=App+Libre'">
+                        </div>
+
+                        <!-- Image 3 -->
+                        <div class="flex flex-col items-center">
+                            <img src="https://www.freestyle.abbott/adobe/dynamicmedia/deliver/dm-aid--a1080cf9-3326-4a23-a447-97045d056222/gl-wifsl-pool-woman-d-2.png?quality=85&width=1600&preferwebp=true" 
+                                 alt="Natación y Agua" 
+                                 class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-cyan-400 shadow-xl transform hover:scale-105 transition-all duration-300"
+                                 onerror="this.src='https://placehold.co/300x300/00A3E0/ffffff?text=Natacion'">
+                        </div>
+
+                        <!-- Image 4 -->
+                        <div class="flex flex-col items-center">
+                            <img src="https://www.freestyle.abbott/adobe/dynamicmedia/deliver/dm-aid--f5fce7de-ac9b-4fc8-8140-b8e6b4ac2d69/3-what-is-fsl-libre-350x247.png?preferwebp=true&width=1600&quality=85" 
+                                 alt="Uso Diario Libre 2" 
+                                 class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-cyan-400 shadow-xl transform hover:scale-105 transition-all duration-300"
+                                 onerror="this.src='https://placehold.co/300x300/002A54/ffffff?text=Sensor+Uso'">
+                        </div>
+
+                    </div>
+
+                    <!-- EXPLANATION TEXT PLACED DIRECTLY BELOW THE 4 IMAGES -->
+                    <div class="max-w-3xl mx-auto text-slate-200 text-base md:text-lg font-light leading-relaxed bg-slate-900/40 p-6 md:p-8 rounded-2xl border border-white/10">
+                        <p class="mb-4">
+                            El sensor FreeStyle Libre 2 cuenta con certificación de resistencia al agua (sumergible hasta 1 metro de profundidad durante un tiempo máximo de 30 minutos).
+                        </p>
+                        <p class="text-cyan-200 font-normal">
+                            Para prácticas deportivas de alta intensidad, actividades acuáticas prolongadas o épocas de alta sudoración, en <strong class="text-white font-bold">DBT Urquiza</strong> recomendamos reforzar la adhesión del sensor utilizando parches protectores impermeables hipoalergénicos o cintas de sujeción elásticas. Esto evita enganches accidentales y asegura la máxima durabilidad durante los 14 días completos.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- DIGITAL ECOSYSTEM & OFFICIAL VIDEOS -->
+        <section id="ecosistema" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-abbott-cyan font-bold uppercase tracking-wider text-sm">Conectividad Digital</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-4">
+                        Ecosistema Digital FreeStyle
+                    </h2>
+                    <p class="text-slate-600 text-lg">
+                        Plataformas e integraciones oficiales diseñadas para optimizar el seguimiento continuo y compartir reportes con tu equipo médico.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+                    
+                    <!-- FreeStyle LibreLink -->
+                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 shadow-md hover:shadow-xl transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-14 h-14 rounded-2xl bg-cyan-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-cyan-500/30">
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+                                </div>
+                                <span class="px-3 py-1 bg-cyan-100 text-cyan-800 rounded-full text-xs font-bold">App Móvil</span>
+                            </div>
+
+                            <h3 class="text-2xl font-extrabold text-slate-900 mb-3">FreeStyle LibreLink</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                                Aplicación para smartphone que te permite recibir lecturas y alarmas de glucosa directamente en tu teléfono compatible, sin necesidad de cargar un lector adicional.
+                            </p>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-200 flex flex-wrap gap-3">
+                            <button onclick="openVideoModal('https://www.youtube.com/embed/MeGYX4JmnPc')" class="flex-1 py-3 px-4 rounded-xl bg-abbott-blue text-white font-bold text-sm hover:bg-slate-800 transition-all text-center flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-circle-play text-cyan-400"></i>
+                                <span>Ver Video Explicativo</span>
+                            </button>
+                            <a href="https://youtu.be/MeGYX4JmnPc?si=uhb34XUBqM9V3rO4" target="_blank" rel="noopener noreferrer" class="py-3 px-4 rounded-xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition-all text-center flex items-center justify-center">
+                                <i class="fa-brands fa-youtube text-red-600"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- LibreView -->
+                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 shadow-md hover:shadow-xl transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">Plataforma Médica</span>
+                            </div>
+
+                            <h3 class="text-2xl font-extrabold text-slate-900 mb-3">LibreView</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                                Sistema de gestión de salud basado en la nube que permite generar e informes claros y detallados para compartirlos fácilmente con tu médico tratante.
+                            </p>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-200 flex flex-wrap gap-3">
+                            <button onclick="openVideoModal('https://www.youtube.com/embed/AlhX7vPD9Ug')" class="flex-1 py-3 px-4 rounded-xl bg-abbott-blue text-white font-bold text-sm hover:bg-slate-800 transition-all text-center flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-circle-play text-cyan-400"></i>
+                                <span>Ver Video Explicativo</span>
+                            </button>
+                            <a href="https://youtu.be/AlhX7vPD9Ug?si=bfVoDDL_33-dV61Q" target="_blank" rel="noopener noreferrer" class="py-3 px-4 rounded-xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition-all text-center flex items-center justify-center">
+                                <i class="fa-brands fa-youtube text-red-600"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CONTACT & DISTRIBUTION SECTION -->
+        <section id="contacto" class="py-20 bg-slate-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+                    
+                    <div>
+                        <span class="text-abbott-cyan font-bold uppercase tracking-wider text-sm">Atención Personalizada</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-2 mb-6">
+                            Contactá con DBT Urquiza
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8 font-light">
+                            Somos distribuidores especializados del sistema FreeStyle Libre 2. Te asesoramos sobre disponibilidad, envíos y consultas técnicas generales.
+                        </p>
+
+                        <div class="space-y-6">
+                            <!-- Teléfono -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-semibold uppercase">Teléfono de Contacto</span>
+                                    <a href="tel:+541151796752" class="text-xl font-bold text-white hover:text-cyan-400 transition-colors">
+                                        +54 11 51796752
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-semibold uppercase">Correo Electrónico</span>
+                                    <a href="mailto:dbturquiza@gmail.com" class="text-xl font-bold text-white hover:text-cyan-400 transition-colors">
+                                        dbturquiza@gmail.com
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Ubicación / Cobertura -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="fa-solid fa-truck-fast"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-semibold uppercase">Envíos y Distribución</span>
+                                    <span class="text-lg font-semibold text-slate-200">Envíos programados y retiro en punto de atención</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Contact Card -->
+                    <div class="bg-slate-800/80 rounded-3xl p-8 border border-slate-700 shadow-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-4">¿Querés encargar tu sensor?</h3>
+                        <p class="text-slate-300 text-sm mb-8 leading-relaxed">
+                            Escribinos directamente a nuestro WhatsApp oficial para recibir atención inmediata y cotización.
+                        </p>
+
+                        <a href="https://wa.me/541151796752?text=Hola%20DBT%20Urquiza,%20quisiera%20consultar%20por%20el%20sensor%20FreeStyle%20Libre%202" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="w-full py-4 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg shadow-emerald-500/30">
+                            <i class="fa-brands fa-whatsapp text-2xl"></i>
+                            <span>Enviar Mensaje por WhatsApp</span>
+                        </a>
+
+                        <div class="mt-6 pt-6 border-t border-slate-700/60 text-center text-xs text-slate-400">
+                            <p>Horario de Atención: Lunes a Viernes de 9:00 a 18:00 hs.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-500 py-10 border-t border-slate-800 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-abbott-cyan rounded-lg flex items-center justify-center text-slate-950 font-bold text-sm">
+                    <i class="fa-solid fa-wave-square"></i>
+                </div>
+                <span class="font-bold text-slate-300">DBT URQUIZA</span>
+            </div>
+            <p class="text-center md:text-left text-xs">
+                © 2026 DBT Urquiza. Distribuidores de productos médicos y monitoreo continuo FreeStyle Libre.
+            </p>
+            <div class="text-xs text-slate-600">
+                FreeStyle y marcas relacionadas son propiedad de Abbott.
+            </div>
+        </div>
+    </footer>
+
+    <!-- FLOATING WHATSAPP BUTTON -->
+    <a href="https://wa.me/541151796752?text=Hola%20DBT%20Urquiza,%20quisiera%20consultar%20por%20el%20sensor%20FreeStyle%20Libre%202" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+       aria-label="Contacto WhatsApp Floating">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span class="absolute right-16 bg-slate-900 text-white text-xs font-bold py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
+            Consultar por WhatsApp
+        </span>
+    </a>
+
+    <!-- VIDEO MODAL POPUP -->
+    <div id="video-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-2xl max-w-3xl w-full border border-slate-700 overflow-hidden shadow-2xl relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+                <h4 class="font-bold text-white text-sm">Video Informativo Oficial</h4>
+                <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="relative pt-[56.25%] w-full bg-black">
+                <iframe id="video-modal-iframe" class="absolute inset-0 w-full h-full" src="" title="Video FreeStyle" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Smooth Navigate Function without Hash (#) in URL
+        function navigateTo(elementId) {
+            const target = document.getElementById(elementId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        // Mobile Menu Toggle logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Hero Slider Logic
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.dot-btn');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('hidden');
+                    slide.classList.add('active-slide');
+                } else {
+                    slide.classList.add('hidden');
+                    slide.classList.remove('active-slide');
+                }
+            });
+
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.remove('bg-slate-700', 'w-3');
+                    dot.classList.add('bg-abbott-cyan', 'w-3.5');
+                } else {
+                    dot.classList.remove('bg-abbott-cyan', 'w-3.5');
+                    dot.classList.add('bg-slate-700', 'w-3');
+                }
+            });
+
+            currentSlide = index;
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        document.getElementById('hero-next')?.addEventListener('click', () => {
+            let nextIndex = (currentSlide + 1) % totalSlides;
+            showSlide(nextIndex);
+        });
+
+        document.getElementById('hero-prev')?.addEventListener('click', () => {
+            let prevIndex = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(prevIndex);
+        });
+
+        // Auto slide hero every 7 seconds
+        setInterval(() => {
+            let nextIndex = (currentSlide + 1) % totalSlides;
+            showSlide(nextIndex);
+        }, 7000);
+
+        // Video Modal Handler
+        function openVideoModal(url) {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-modal-iframe');
+            if (modal && iframe) {
+                iframe.src = url + "?autoplay=1";
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-modal-iframe');
+            if (modal && iframe) {
+                iframe.src = "";
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('video-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'video-modal') {
+                closeVideoModal();
+            }
+        });
+    </script>
+</body>
+</html>
