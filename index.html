@@ -792,12 +792,24 @@
         function navigateTo(elementId) {
             const target = document.getElementById(elementId);
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            // Auto close mobile menu if open
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.add('hidden');
+                // Cierra el menú móvil si está abierto
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+                
+                // Calcula el offset considerando el header sticky
+                const header = document.querySelector('header');
+                const headerHeight = header ? header.offsetHeight : 0;
+                const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+                
+                // Desplaza sin bloquear la interacción
+                requestAnimationFrame(() => {
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                });
             }
         }
 
